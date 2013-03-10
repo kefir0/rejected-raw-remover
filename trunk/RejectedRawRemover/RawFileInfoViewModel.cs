@@ -24,6 +24,11 @@ namespace RejectedRawRemover
             get { return _rawFileInfo.Path; }
         }
 
+        public RawFileInfo RawFileInfo
+        {
+            get { return _rawFileInfo; }
+        }
+
         public BitmapSource Thumbnail
         {
             get
