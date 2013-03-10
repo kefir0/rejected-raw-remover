@@ -116,7 +116,7 @@ namespace RejectedRawRemover
 
         private bool CanDeleteSelected()
         {
-            return !IsSearching && _selectedItems != null && _selectedItems.Any();
+            return _selectedItems != null && _selectedItems.Any();
         }
 
         private void DeleteSelected()
@@ -136,6 +136,9 @@ namespace RejectedRawRemover
                         EventLog.Add(string.Format("Failed to delete file {0}: {1}", rawFileInfoViewModel.Path, error));
                     }
                 }
+
+                TotalSize = RejectedFiles.Sum(x => x.RawFileInfo.Size)/(1024*1024);
+                RaisePropertyChanged("TotalSize");
             }
         }
 
