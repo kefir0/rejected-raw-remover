@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -19,20 +21,24 @@ namespace RejectedRawRemover
     {
         private readonly Dispatcher _dispatcher;
         private readonly DispatcherTimer _dispatcherTimer;
+        private readonly HashSet<RawFileInfo> _rejectedFilesSet = new HashSet<RawFileInfo>();
         private RelayCommand _browseRootDirCommand;
-        private RelayCommand _startSearchCommand;
-        private RelayCommand _stopSearchCommand;
         private string _currentDir;
         private string _currentFile;
+        private RelayCommand _deleteSelectedCommand;
         private bool _isSearching;
         private ConcurrentBag<RawFileInfo> _rejectedFiles;
-        private readonly HashSet<RawFileInfo> _rejectedFilesSet = new HashSet<RawFileInfo>();
         private string _rootDir = @"d:\Photo";
         private CancellationTokenSource _searchCancellationTokenSource;
+        private RawFileInfoViewModel[] _selectedItems;
+        private RelayCommand _startSearchCommand;
+        private RelayCommand _stopSearchCommand;
 
         public MainWindowViewModel()
         {
             RejectedFiles = new ObservableCollection<RawFileInfoViewModel>();
+            EventLog = new ObservableCollection<string>();
+
             _dispatcher = Dispatcher.CurrentDispatcher;
             _dispatcherTimer = new DispatcherTimer(DispatcherPriority.Background)
                                    {
@@ -43,6 +49,7 @@ namespace RejectedRawRemover
         }
 
         public ObservableCollection<RawFileInfoViewModel> RejectedFiles { get; private set; }
+        public ObservableCollection<string> EventLog { get; private set; }
 
         public RelayCommand StartSearchCommand
         {
@@ -88,6 +95,11 @@ namespace RejectedRawRemover
             get { return _browseRootDirCommand ?? (_browseRootDirCommand = new RelayCommand(BrowseRootDir, () => !IsSearching)); }
         }
 
+        public RelayCommand DeleteSelectedCommand
+        {
+            get { return _deleteSelectedCommand ?? (_deleteSelectedCommand = new RelayCommand(DeleteSelected, CanDeleteSelected)); }
+        }
+
         public string CurrentDir
         {
             get { return _currentDir; }
@@ -101,6 +113,31 @@ namespace RejectedRawRemover
         public long ProcessedFileCount { get; private set; }
 
         public long TotalSize { get; private set; }
+
+        private bool CanDeleteSelected()
+        {
+            return !IsSearching && _selectedItems != null && _selectedItems.Any();
+        }
+
+        private void DeleteSelected()
+        {
+            if (MessageBox.Show(string.Format("Delete {0} files?", _selectedItems.Length), "Are you sure?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                foreach (var rawFileInfoViewModel in _selectedItems.ToArray())
+                {
+
+                    var error = rawFileInfoViewModel.DeleteFiles();
+                    if (error == null)
+                    {
+                        RejectedFiles.Remove(rawFileInfoViewModel);
+                    }
+                    else
+                    {
+                        EventLog.Add(string.Format("Failed to delete file {0}: {1}", rawFileInfoViewModel.Path, error));
+                    }
+                }
+            }
+        }
 
         private void UpdateProgress(object sender, EventArgs e)
         {
@@ -162,7 +199,7 @@ namespace RejectedRawRemover
                 foreach (var fileInfo in XmpUtil.GetRejectedXmpFileInfos(RootDir, OnFileProcessed))
                 {
                     _rejectedFiles.Add(fileInfo);
-                    TotalSize += fileInfo.Size/(1024*1024);  // In megabytes
+                    TotalSize += fileInfo.Size/(1024*1024); // In megabytes
                     _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 }
             }
@@ -178,6 +215,11 @@ namespace RejectedRawRemover
         {
             ProcessedFileCount++;
             _currentFile = file;
+        }
+
+        public void SetSelectedItems(IEnumerable selectedItems)
+        {
+            _selectedItems = selectedItems.OfType<RawFileInfoViewModel>().ToArray();
         }
     }
 }

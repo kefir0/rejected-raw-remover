@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using GalaSoft.MvvmLight;
 using Microsoft.WindowsAPICodePack.Shell;
@@ -41,6 +43,20 @@ namespace RejectedRawRemover
             _thumbnail = shellFile.Thumbnail.MediumBitmapSource;
             _thumbnail.Freeze();
             RaisePropertyChanged("Thumbnail");
+        }
+
+        public string DeleteFiles()
+        {
+            try
+            {
+                File.Delete(_rawFileInfo.XmpPath);
+                File.Delete(_rawFileInfo.Path);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
     }
 }
