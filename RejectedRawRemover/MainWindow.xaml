@@ -22,8 +22,6 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition />
-            <RowDefinition />
-            <RowDefinition />
         </Grid.RowDefinitions>
         <DockPanel>
             <TextBlock Text="Root dir:" Margin="0 0 5 0" DockPanel.Dock="Left" />
@@ -33,8 +31,17 @@
         <DockPanel Grid.Row="1">
             <Button Command="{Binding StartSearchCommand}" Content="Start Search" Margin="0 0 5 0" DockPanel.Dock="Left" />
             <Button Command="{Binding StopSearchCommand}"  Content="Stop Search"  Margin="5 0 0 0" DockPanel.Dock="Right" />
-            <ProgressBar IsIndeterminate="True" Visibility="{Binding IsSearching, Converter={StaticResource _booleanToVisibilityConverter}}" />
+            <Grid>
+                <ProgressBar IsIndeterminate="True" Visibility="{Binding IsSearching, Converter={StaticResource _booleanToVisibilityConverter}}" />
+                <TextBlock>
+                    <Run Text="{Binding ProcessedFileCount, StringFormat='Processed: {0}; '}" />
+                    <Run Text="{Binding TotalSize, StringFormat='Total Size: {0} Mb; '}" />
+                    <Run Text="{Binding CurrentDir, StringFormat='Current Dir: {0}; '}" />
+                </TextBlock>
+            </Grid>
         </DockPanel>
+        
+        <ListBox ItemsSource="{Binding RejectedFiles}" Grid.Row="2" Margin="5" DisplayMemberPath="Path" />
         
     </Grid>
 </Window>
