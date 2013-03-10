@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:RejectedRawRemover="clr-namespace:RejectedRawRemover" mc:Ignorable="d" Title="MainWindow" Height="350" Width="525"
+        xmlns:RejectedRawRemover="clr-namespace:RejectedRawRemover"
+        xmlns:XmpUtils="clr-namespace:XmpUtils;assembly=XmpUtils" mc:Ignorable="d" Title="Rejected Raw File Remover" Height="550" Width="725"
         d:DataContext="{d:DesignInstance RejectedRawRemover:MainWindowViewModel}">
     <Window.Resources>
         <Style TargetType="TextBlock">
@@ -16,12 +17,35 @@
             <Setter Property="Margin" Value="5,5,5,0" />
         </Style>
         <BooleanToVisibilityConverter x:Key="_booleanToVisibilityConverter" />
+        
+        <DataTemplate x:Key="FileTemplate" DataType="RejectedRawRemover:RawFileInfoViewModel">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding Thumbnail}" MaxHeight="50" />
+                <TextBlock Text="{Binding Path}" Margin="5" />
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="SelectedFileTemplate" DataType="RejectedRawRemover:RawFileInfoViewModel">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding Thumbnail}" MaxHeight="300" />
+                <TextBlock Text="{Binding Path}" Margin="5" />
+            </StackPanel>
+        </DataTemplate>
+
+        <Style TargetType="{x:Type ListBoxItem}" >
+            <Setter Property="ContentTemplate" Value="{StaticResource FileTemplate}" />
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="ContentTemplate" Value="{StaticResource SelectedFileTemplate}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <DockPanel>
             <TextBlock Text="Root dir:" Margin="0 0 5 0" DockPanel.Dock="Left" />
@@ -35,13 +59,14 @@
                 <ProgressBar IsIndeterminate="True" Visibility="{Binding IsSearching, Converter={StaticResource _booleanToVisibilityConverter}}" />
                 <TextBlock>
                     <Run Text="{Binding ProcessedFileCount, StringFormat='Processed: {0}; '}" />
+                    <Run Text="{Binding RejectedFiles.Count, StringFormat='Rejected: {0}; ', Mode=OneWay}" />
                     <Run Text="{Binding TotalSize, StringFormat='Total Size: {0} Mb; '}" />
                     <Run Text="{Binding CurrentDir, StringFormat='Current Dir: {0}; '}" />
                 </TextBlock>
             </Grid>
         </DockPanel>
         
-        <ListBox ItemsSource="{Binding RejectedFiles}" Grid.Row="2" Margin="5" DisplayMemberPath="Path" />
+        <ListBox ItemsSource="{Binding RejectedFiles}" Grid.Row="2" Margin="5" />
         
     </Grid>
 </Window>
