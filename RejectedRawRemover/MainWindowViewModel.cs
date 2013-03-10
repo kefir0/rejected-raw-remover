@@ -32,7 +32,7 @@ namespace RejectedRawRemover
 
         public MainWindowViewModel()
         {
-            RejectedFiles = new ObservableCollection<RawFileInfo>();
+            RejectedFiles = new ObservableCollection<RawFileInfoViewModel>();
             _dispatcher = Dispatcher.CurrentDispatcher;
             _dispatcherTimer = new DispatcherTimer(DispatcherPriority.Background)
                                    {
@@ -42,7 +42,7 @@ namespace RejectedRawRemover
             _dispatcherTimer.Tick += UpdateProgress;
         }
 
-        public ObservableCollection<RawFileInfo> RejectedFiles { get; private set; }
+        public ObservableCollection<RawFileInfoViewModel> RejectedFiles { get; private set; }
 
         public RelayCommand StartSearchCommand
         {
@@ -118,7 +118,7 @@ namespace RejectedRawRemover
                 if (!_rejectedFilesSet.Contains(rejectedFile))
                 {
                     _rejectedFilesSet.Add(rejectedFile);
-                    RejectedFiles.Add(rejectedFile);
+                    RejectedFiles.Add(new RawFileInfoViewModel(rejectedFile));
                 }
             }
         }
@@ -168,6 +168,8 @@ namespace RejectedRawRemover
             }
             finally
             {
+                _currentFile = string.Empty;
+                CurrentDir = string.Empty;
                 _dispatcher.BeginInvoke((Action) (() => { IsSearching = false; }));
             }
         }
