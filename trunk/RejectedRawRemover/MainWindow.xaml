@@ -1,0 +1,40 @@
+﻿<Window x:Class="RejectedRawRemover.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:RejectedRawRemover="clr-namespace:RejectedRawRemover" mc:Ignorable="d" Title="MainWindow" Height="350" Width="525"
+        d:DataContext="{d:DesignInstance RejectedRawRemover:MainWindowViewModel}">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Width" Value="90" />
+        </Style>
+        <Style TargetType="DockPanel">
+            <Setter Property="Margin" Value="5,5,5,0" />
+        </Style>
+        <BooleanToVisibilityConverter x:Key="_booleanToVisibilityConverter" />
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <DockPanel>
+            <TextBlock Text="Root dir:" Margin="0 0 5 0" DockPanel.Dock="Left" />
+            <Button Command="{Binding BrowseRootDirCommand}" DockPanel.Dock="Right" Margin="5 0 0 0" Content="..." />
+            <TextBox Text="{Binding RootDir}" IsReadOnly="True" />
+        </DockPanel>
+        <DockPanel Grid.Row="1">
+            <Button Command="{Binding StartSearchCommand}" Content="Start Search" Margin="0 0 5 0" DockPanel.Dock="Left" />
+            <Button Command="{Binding StopSearchCommand}"  Content="Stop Search"  Margin="5 0 0 0" DockPanel.Dock="Right" />
+            <ProgressBar IsIndeterminate="True" Visibility="{Binding IsSearching, Converter={StaticResource _booleanToVisibilityConverter}}" />
+        </DockPanel>
+        
+    </Grid>
+</Window>
