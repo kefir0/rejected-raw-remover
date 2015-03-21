@@ -1,0 +1,1 @@
+Searches and deletes "Rejected" Adobe Camera Raw / Bridge files (xmp+cr2). Adobe Camera Raw can also do this, but very slow when non-indexed.
